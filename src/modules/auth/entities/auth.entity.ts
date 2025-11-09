@@ -10,4 +10,5 @@ export class Customer {
   otpExpiry: Date;
   isVerified: boolean;
   userAgent: string;
+  credentialUpdatedAt: Date;
 }

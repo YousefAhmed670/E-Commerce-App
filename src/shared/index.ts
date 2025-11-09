@@ -1,1 +1,1 @@
-export * from './modules/user-mongo.module';
+export * from './modules';

@@ -7,7 +7,9 @@ import devConfig from './config/env/dev.config';
 import { AuthModule } from './modules/auth/auth.module';
 import { BrandModule } from './modules/brand/brand.module';
 import { CategoryModule } from './modules/category/category.module';
+import { CustomerModule } from './modules/customer/customer.module';
 import { ProductModule } from './modules/product/product.module';
+import { CommonModule } from './shared';
 
 @Module({
   imports: [
@@ -18,10 +20,12 @@ import { ProductModule } from './modules/product/product.module';
         uri: configService.get('database').url,
       }),
     }),
+    CommonModule,
     AuthModule,
     ProductModule,
     CategoryModule,
     BrandModule,
+    CustomerModule,
   ],
   controllers: [AppController],
   providers: [AppService],

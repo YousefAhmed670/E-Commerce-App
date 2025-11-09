@@ -4,8 +4,10 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { AuthFactoryService } from './factory';
 import { ResetPasswordDTO, SendOtpDTO, VerifyEmailDTO } from './dto/verify-email.dto';
+import { Auth, MESSAGE, Public, User } from '@/common';
 
 @Controller('auth')
+@Auth('Admin', 'Customer', 'Seller')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
@@ -13,6 +15,7 @@ export class AuthController {
   ) {}
 
   @Post('/register')
+  @Public()
   async register(@Body() registerDto: RegisterDto) {
     const customer = await this.authFactoryService.createCustomer(registerDto);
     const createdCustomer = await this.authService.register(customer);
@@ -24,6 +27,7 @@ export class AuthController {
   }
 
   @Post('/verify-email')
+  @Public()
   async verifyEmail(@Body() verifyEmailDto: VerifyEmailDTO) {
     await this.authService.verifyEmail(verifyEmailDto);
     return {
@@ -33,6 +37,7 @@ export class AuthController {
   }
 
   @Post('/login')
+  @Public()
   async login(@Body() loginDto: LoginDto) {
     const { token, refreshToken } = await this.authService.login(loginDto);
     return {
@@ -68,6 +73,16 @@ export class AuthController {
     await this.authService.resetPassword(resetPasswordDto);
     return {
       message: 'Password reset successfully',
+      success: true,
+    };
+  }
+
+  @Put("/logout")
+  async logout(@Req() req,@User() user:any) {
+    const token = req.headers.authorization;
+    await this.authService.logout(token,user);
+    return {
+      message: MESSAGE.user.logout,
       success: true,
     };
   }

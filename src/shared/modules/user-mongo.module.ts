@@ -4,13 +4,17 @@ import {
     Admin,
     AdminRepository,
     AdminSchema,
+    BlackListToken,
+    BlackListTokenSchema,
     Customer,
     CustomerRepository,
     CustomerSchema,
     Seller,
     SellerRepository,
     SellerSchema,
+    TokenRepository,
     User,
+    UserRepository,
     UserSchema,
 } from 'src/models';
 
@@ -26,9 +30,13 @@ import {
           { name: Customer.name, schema: CustomerSchema },
         ],
       },
+      {
+        name: BlackListToken.name,
+        schema: BlackListTokenSchema,
+      },
     ]),
   ],
-  providers: [CustomerRepository, AdminRepository, SellerRepository],
-  exports: [CustomerRepository, AdminRepository, SellerRepository],
+  providers: [CustomerRepository, AdminRepository, SellerRepository,UserRepository,TokenRepository],
+  exports: [CustomerRepository, AdminRepository, SellerRepository,UserRepository,TokenRepository],
 })
 export class UserMongoModule {}

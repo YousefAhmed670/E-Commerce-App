@@ -21,6 +21,7 @@ export class Seller {
   shopDescription: string;
   @Prop({ type: String, required: true })
   shopAddress: string;
+  credentialUpdatedAt: Date;
 }
 
 export const SellerSchema = SchemaFactory.createForClass(Seller);

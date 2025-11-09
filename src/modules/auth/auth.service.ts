@@ -5,7 +5,7 @@ import {
   generateOtp,
   hash,
 } from '@/common/utilities';
-import { CustomerRepository } from '@/models';
+import { CustomerRepository, UserRepository, TokenRepository, TokenType } from '@/models';
 import {
   BadRequestException,
   ConflictException,
@@ -15,22 +15,28 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dto/login.dto';
-import { ResetPasswordDTO, SendOtpDTO, VerifyEmailDTO } from './dto/verify-email.dto';
+import {
+  ResetPasswordDTO,
+  SendOtpDTO,
+  VerifyEmailDTO,
+} from './dto/verify-email.dto';
 import { Customer } from './entities/auth.entity';
-
+import { MESSAGE } from '@/common';
 @Injectable()
 export class AuthService {
   constructor(
     private readonly customerRepository: CustomerRepository,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly userRepository: UserRepository,
+    private readonly tokenRepository: TokenRepository,
   ) {}
   async register(customer: Customer) {
-    const customerExists = await this.customerRepository.getOne({
+    const customerExists = await this.userRepository.getOne({
       email: customer.email,
     });
     if (customerExists) {
-      throw new ConflictException('User already exists');
+      throw new ConflictException(MESSAGE.user.alreadyExists);
     }
     const createdCustomer = await this.customerRepository.create(customer);
     const { password, otp, otpExpiry, ...restCustomer } = JSON.parse(
@@ -43,7 +49,7 @@ export class AuthService {
     const { otp, email } = verifyEmailDto;
     const customerExist = await this.customerRepository.getOne({ email });
     if (!customerExist) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException(MESSAGE.user.notFound);
     }
     if (
       customerExist?.otpExpiry &&
@@ -65,11 +71,11 @@ export class AuthService {
   }
 
   async login(loginDto: LoginDto) {
-    const customerExist = await this.customerRepository.getOne({
+    const customerExist = await this.userRepository.getOne({
       email: loginDto.email,
     });
     if (!customerExist) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException(MESSAGE.user.notFound);
     }
     if (!customerExist.isVerified) {
       throw new BadRequestException('User not verified');
@@ -109,11 +115,11 @@ export class AuthService {
     const payload = this.jwtService.verify(refreshToken, {
       secret: this.configService.get('token.refreshSecret'),
     });
-    const customerExist = await this.customerRepository.getOne({
+    const customerExist = await this.userRepository.getOne({
       _id: payload._id,
     });
     if (!customerExist) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException(MESSAGE.user.notFound);
     }
     const token = this.jwtService.sign(
       {
@@ -145,7 +151,7 @@ export class AuthService {
       email: sendOtpDto.email,
     });
     if (!customerExist) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException(MESSAGE.user.notFound);
     }
     if (
       customerExist.otp &&
@@ -182,18 +188,19 @@ export class AuthService {
       email: resetPasswordDto.email,
     });
     if (!customerExist) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException(MESSAGE.user.notFound);
     }
     if (
       customerExist?.otp &&
       customerExist?.otpExpiry &&
       customerExist?.otpExpiry.getTime() < Date.now()
     ) {
-      throw new BadRequestException(
-        'OTP expired. please request a new one',
-      );
+      throw new BadRequestException('OTP expired. please request a new one');
     }
-    if (!customerExist.otp || !(await compareHash(resetPasswordDto.otp, customerExist.otp))) {
+    if (
+      !customerExist.otp ||
+      !(await compareHash(resetPasswordDto.otp, customerExist.otp))
+    ) {
       throw new BadRequestException('Invalid OTP');
     }
     if (resetPasswordDto.password !== resetPasswordDto.confirmPassword) {
@@ -207,6 +214,16 @@ export class AuthService {
         $unset: { otp: '', otpExpiry: '' },
       },
     );
+    return true;
+  }
+
+  async logout(token:string,user:any) {
+    await this.tokenRepository.create({
+      token,
+      userId: user._id,
+      type: TokenType.ACCESS_TOKEN,
+      role: user.role,
+    })
     return true;
   }
 }

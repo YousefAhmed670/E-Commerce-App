@@ -23,6 +23,8 @@ export class User {
   otpExpiry: Date;
   @Prop({ type: Boolean, default: false })
   isVerified: boolean;
+  @Prop({ type: Date })
+  credentialUpdatedAt: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

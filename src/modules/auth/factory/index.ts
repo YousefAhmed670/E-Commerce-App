@@ -18,6 +18,7 @@ export class AuthFactoryService {
     customer.otp = generateOtp();
     customer.otpExpiry = generateExpiry();
     customer.isVerified = false;
+    customer.credentialUpdatedAt = new Date();
     return customer;
   }
 }

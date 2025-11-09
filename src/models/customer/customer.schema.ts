@@ -19,6 +19,7 @@ export class Customer {
   isVerified: boolean;
   @Prop({ type: String, enum: ['local', 'google'], default: 'local' })
   userAgent: string;
+  credentialUpdatedAt: Date;
 }
 export const CustomerSchema = SchemaFactory.createForClass(Customer);
 

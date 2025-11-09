@@ -1,15 +1,38 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { Auth, MESSAGE, Public, User } from '@/common';
+import { ProductFactoryService } from './factory';
 
 @Controller('product')
+@Auth('Admin', 'Seller')
 export class ProductController {
-  constructor(private readonly productService: ProductService) {}
+  constructor(
+    private readonly productService: ProductService,
+    private readonly productFactoryService: ProductFactoryService,
+  ) {}
 
   @Post()
-  create(@Body() createProductDto: CreateProductDto) {
-    return this.productService.create(createProductDto);
+  async create(@Body() createProductDto: CreateProductDto, @User() user: any) {
+    const product = this.productFactoryService.createProduct(
+      createProductDto,
+      user,
+    );
+    const createdProduct = await this.productService.create(product);
+    return {
+      message: MESSAGE.product.created,
+      success: true,
+      data: { product: createdProduct },
+    };
   }
 
   @Get()
@@ -18,17 +41,35 @@ export class ProductController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.productService.findOne(+id);
+  @Public()
+  async findOne(@Param('id') id: string) {
+    const product = await this.productService.findOne(id);
+    return {
+      message: MESSAGE.product.found,
+      success: true,
+      data: { product },
+    };
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
-    return this.productService.update(+id, updateProductDto);
+  async update(
+    @Param('id') id: string,
+    @Body() updateProductDto: UpdateProductDto,
+    @User() user: any,
+  ) {
+    const updatedProduct = await this.productService.update(
+      id,
+      updateProductDto,
+    );
+    return {
+      message: MESSAGE.product.updated,
+      success: true,
+      data: { product: updatedProduct },
+    };
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.productService.remove(+id);
+  async remove(@Param('id') id: string) {
+    return this.productService.remove(id);
   }
 }
