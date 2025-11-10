@@ -37,7 +37,7 @@ export class AbstractRepository<T> {
     update: UpdateQuery<T>,
     options?: MongooseUpdateQueryOptions,
   ) {
-    return this.model.findOneAndUpdate(filter, update, options);
+    return this.model.findOneAndUpdate(filter, update, {...options,new:true});
   }
 
   async delete(filter: RootFilterQuery<T>): Promise<DeleteResult> {

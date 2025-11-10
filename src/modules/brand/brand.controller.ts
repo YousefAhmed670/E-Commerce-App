@@ -1,17 +1,18 @@
+import { Auth, MESSAGE, Public, User } from '@/common';
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  Query,
 } from '@nestjs/common';
 import { BrandService } from './brand.service';
 import { CreateBrandDto } from './dto/create-brand.dto';
-import { UpdateBrandDto } from './dto/update-brand.dto';
+import { FindAllBrandDto, UpdateBrandDto } from './dto/update-brand.dto';
 import { BrandFactoryService } from './factory';
-import { Auth, MESSAGE, Public, User } from '@/common';
 
 @Controller('brand')
 @Auth('Admin')
@@ -33,8 +34,14 @@ export class BrandController {
   }
 
   @Get()
-  findAll() {
-    return this.brandService.findAll();
+  @Public()
+  async findAll(@Query() findAllBrandDto: FindAllBrandDto) {
+    const brands = await this.brandService.findAll(findAllBrandDto);
+    return {
+      message: MESSAGE.brand.found,
+      success: true,
+      data: { brands },
+    };
   }
 
   @Get(':id')
@@ -48,9 +55,27 @@ export class BrandController {
     };
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateBrandDto: UpdateBrandDto) {}
+  @Put(':id')
+  async update(
+    @Param('id') id: string,
+    @Body() updateBrandDto: UpdateBrandDto,
+    @User() user: any,
+  ) {
+    const brand = this.brandFactoryService.updateBrand(updateBrandDto, user);
+    const updatedBrand = await this.brandService.update(id, brand);
+    return {
+      message: MESSAGE.brand.updated,
+      success: true,
+      data: { brand: updatedBrand },
+    };
+  }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {}
+  async remove(@Param('id') id: string) {
+    await this.brandService.remove(id);
+    return {
+      message: MESSAGE.brand.deleted,
+      success: true,
+    };
+  }
 }

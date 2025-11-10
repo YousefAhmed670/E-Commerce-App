@@ -1,8 +1,12 @@
 import { MESSAGE } from '@/common';
 import { BrandRepository } from '@/models';
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { Types } from 'mongoose';
-import { UpdateBrandDto } from './dto/update-brand.dto';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { DeleteResult, Types } from 'mongoose';
+import { FindAllBrandDto, UpdateBrandDto } from './dto/update-brand.dto';
 import { Brand } from './entities/brand.entity';
 
 @Injectable()
@@ -17,15 +21,33 @@ export class BrandService {
     return createdBrand;
   }
 
-  findAll() {
-    return `This action returns all brand`;
+  async findAll(findAllBrandDto: FindAllBrandDto) {
+    const { limit, page } = findAllBrandDto;
+    const skip = (+page - 1) * +limit;
+    return await this.brandRepository.getAll(
+      {},
+      {},
+      {
+        populate: [
+          { path: 'createdBy', select: 'userName email' },
+          { path: 'updatedBy', select: 'userName email' },
+        ],
+        limit: +limit,
+        skip,
+      },
+    );
   }
 
   async findOne(id: string | Types.ObjectId) {
     const brandExist = await this.brandRepository.getOne(
       { _id: id },
       {},
-      { populate: [{ path: 'createdBy' }, { path: 'updatedBy' }] },
+      {
+        populate: [
+          { path: 'createdBy', select: 'userName email' },
+          { path: 'updatedBy', select: 'userName email' },
+        ],
+      },
     );
     if (!brandExist) {
       throw new NotFoundException(MESSAGE.brand.notFound);
@@ -33,11 +55,23 @@ export class BrandService {
     return brandExist;
   }
 
-  update(id: string | Types.ObjectId, updateBrandDto: UpdateBrandDto) {
-    return `This action updates a #${id} brand`;
+  async update(id: string | Types.ObjectId, updateBrandDto: UpdateBrandDto) {
+    const brandExist = await this.brandRepository.getOne({ _id: id });
+    if (!brandExist) {
+      throw new NotFoundException(MESSAGE.brand.notFound);
+    }
+    const updatedBrand = await this.brandRepository.update(
+      { _id: brandExist._id },
+      updateBrandDto,
+    );
+    return updatedBrand;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} brand`;
+  async remove(id: string | Types.ObjectId): Promise<DeleteResult> {
+    const brandExist = await this.brandRepository.getOne({ _id: id });
+    if (!brandExist) {
+      throw new NotFoundException(MESSAGE.brand.notFound);
+    }
+    return await this.brandRepository.delete({ _id: id });
   }
 }

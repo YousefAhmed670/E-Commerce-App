@@ -1,18 +1,21 @@
+import { Auth, MESSAGE, Public, User } from '@/common';
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  Query,
 } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
-import { UpdateCategoryDto } from './dto/update-category.dto';
+import {
+  FindAllCategoryDto,
+  UpdateCategoryDto,
+} from './dto/update-category.dto';
 import { CategoryFactoryService } from './facyory';
-import { Auth, MESSAGE, Public, User } from '@/common';
-import { DeleteResult } from 'mongoose';
 
 @Controller('category')
 @Auth('Admin', 'Seller')
@@ -40,8 +43,14 @@ export class CategoryController {
   }
 
   @Get()
-  findAll() {
-    return this.categoryService.findAll();
+  @Public()
+  async findAll(@Query() findAllCategoryDto: FindAllCategoryDto) {
+    const categories = await this.categoryService.findAll(findAllCategoryDto);
+    return {
+      message: MESSAGE.category.found,
+      success: true,
+      data: { categories },
+    };
   }
 
   @Get(':id')
@@ -55,16 +64,30 @@ export class CategoryController {
     };
   }
 
-  @Patch(':id')
+  @Put(':id')
   async update(
-    @Param() id: string,
+    @Param('id') id: string,
     @Body() updateCategoryDto: UpdateCategoryDto,
+    @User() user: any,
   ) {
-    return this.categoryService.update(id, updateCategoryDto);
+    const category = this.categoryFactoryService.updateCategory(
+      updateCategoryDto,
+      user,
+    );
+    const updatedCategory = await this.categoryService.update(id, category);
+    return {
+      message: MESSAGE.category.updated,
+      success: true,
+      data: { category: updatedCategory },
+    };
   }
 
   @Delete(':id')
-  async remove(@Param() id: string): Promise<DeleteResult> {
-    return this.categoryService.remove(id);
+  async remove(@Param('id') id: string) {
+    await this.categoryService.remove(id);
+    return {
+      message: MESSAGE.category.deleted,
+      success: true,
+    };
   }
 }

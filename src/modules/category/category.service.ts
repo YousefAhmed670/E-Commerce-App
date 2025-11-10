@@ -1,8 +1,15 @@
 import { MESSAGE } from '@/common';
 import { CategoryRepository } from '@/models';
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { DeleteResult, Types } from 'mongoose';
-import { UpdateCategoryDto } from './dto/update-category.dto';
+import {
+  FindAllCategoryDto,
+  UpdateCategoryDto,
+} from './dto/update-category.dto';
 import { Category } from './entities/category.entity';
 
 @Injectable()
@@ -19,30 +26,57 @@ export class CategoryService {
     return createdCategory;
   }
 
-  findAll() {
-    return `This action returns all category`;
+  findAll(findAllCategoryDto: FindAllCategoryDto) {
+    const { limit, page } = findAllCategoryDto;
+    const skip = (+page - 1) * +limit;
+    return this.categoryRepository.getAll(
+      {},
+      {},
+      {
+        populate: [
+          { path: 'createdBy', select: 'userName email' },
+          { path: 'updatedBy', select: 'userName email' },
+        ],
+        limit: +limit,
+        skip,
+      },
+    );
   }
 
   findOne(id: string | Types.ObjectId) {
-    const category = this.categoryRepository.getOne(
+    const categoryExist = this.categoryRepository.getOne(
       { _id: id },
       {},
-      { populate: [{ path: 'createdBy' }, { path: 'updatedBy' }] },
+      {
+        populate: [
+          { path: 'createdBy', select: 'userName email' },
+          { path: 'updatedBy', select: 'userName email' },
+        ],
+      },
     );
-    if (!category) {
+    if (!categoryExist) {
       throw new NotFoundException(MESSAGE.category.notFound);
     }
-    return category;
+    return categoryExist;
   }
 
-  update(id: string, updateCategoryDto: UpdateCategoryDto) {
-    return this.categoryRepository.update(
-      { _id: id },
+  async update(id: string, updateCategoryDto: UpdateCategoryDto) {
+    const categoryExist = await this.categoryRepository.getOne({ _id: id });
+    if (!categoryExist) {
+      throw new NotFoundException(MESSAGE.category.notFound);
+    }
+    const updatedCategory = await this.categoryRepository.update(
+      { _id: categoryExist._id },
       updateCategoryDto,
     );
+    return updatedCategory;
   }
 
-  remove(id: string): Promise<DeleteResult> {
-    return this.categoryRepository.delete({ _id: id });
+  async remove(id: string): Promise<DeleteResult> {
+    const categoryExist = await this.categoryRepository.getOne({ _id: id });
+    if (!categoryExist) {
+      throw new NotFoundException(MESSAGE.category.notFound);
+    }
+    return await this.categoryRepository.delete({ _id: id });
   }
 }
