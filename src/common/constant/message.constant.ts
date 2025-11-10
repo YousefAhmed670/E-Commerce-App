@@ -6,6 +6,7 @@ const generalMessages = (entity: string) => ({
   created: `${entity} created successfully`,
   found: `${entity} found successfully`,
   logout: `${entity} logged out successfully`,
+  alreadyDeleted: `${entity} already deleted`,
 });
 
 export const MESSAGE = {
@@ -16,4 +17,5 @@ export const MESSAGE = {
   admin: { ...generalMessages('Admin') },
   customer: { ...generalMessages('Customer') },
   seller: { ...generalMessages('Seller') },
+  profile: { ...generalMessages('Profile') },
 };

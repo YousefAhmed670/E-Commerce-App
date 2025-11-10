@@ -5,7 +5,12 @@ import {
   generateOtp,
   hash,
 } from '@/common/utilities';
-import { CustomerRepository, UserRepository, TokenRepository, TokenType } from '@/models';
+import {
+  CustomerRepository,
+  UserRepository,
+  TokenRepository,
+  TokenType,
+} from '@/models';
 import {
   BadRequestException,
   ConflictException,
@@ -82,6 +87,15 @@ export class AuthService {
     }
     if (!(await compareHash(loginDto.password, customerExist.password))) {
       throw new BadRequestException('Invalid password');
+    }
+    if (customerExist.isDeleted) {
+      await this.userRepository.update(
+        { _id: customerExist._id },
+        {
+          isDeleted: false,
+          deletedAt: null,
+        },
+      );
     }
     const token = this.jwtService.sign(
       {
@@ -217,13 +231,13 @@ export class AuthService {
     return true;
   }
 
-  async logout(token:string,user:any) {
+  async logout(token: string, user: any) {
     await this.tokenRepository.create({
       token,
       userId: user._id,
       type: TokenType.ACCESS_TOKEN,
       role: user.role,
-    })
+    });
     return true;
   }
 }

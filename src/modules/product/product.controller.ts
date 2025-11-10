@@ -12,6 +12,7 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Auth, MESSAGE, Public, User } from '@/common';
 import { ProductFactoryService } from './factory';
+import { DeleteResult } from 'mongoose';
 
 @Controller('product')
 @Auth('Admin', 'Seller')
@@ -69,7 +70,7 @@ export class ProductController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string) {
+  async remove(@Param('id') id: string): Promise<DeleteResult> {
     return this.productService.remove(id);
   }
 }

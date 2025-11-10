@@ -13,6 +13,9 @@ export class Admin {
   email: string;
   password: string;
   phoneNumber: string;
+  gender: string;
   credentialUpdatedAt: Date;
+  isDeleted: boolean;
+  deletedAt: Date;
 }
 export const AdminSchema = SchemaFactory.createForClass(Admin);

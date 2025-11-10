@@ -56,7 +56,7 @@ export class AuthGuard implements CanActivate {
         throw new UnauthorizedException('User logged out');
       }
       if (userExist.credentialUpdatedAt > new Date(payload.iat! * 1000)) {
-        throw new UnauthorizedException('User logged out');
+        throw new UnauthorizedException('invalid credentials');
       }
       request.user = userExist;
       return true;

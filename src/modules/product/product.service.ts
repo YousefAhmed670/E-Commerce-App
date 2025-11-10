@@ -4,7 +4,7 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { Product } from './entities/product.entity';
 import { CategoryService } from '../category/category.service';
 import { BrandService } from '../brand/brand.service';
-import { Types } from 'mongoose';
+import { DeleteResult, Types } from 'mongoose';
 import { MESSAGE } from '@/common';
 
 @Injectable()
@@ -63,7 +63,7 @@ export class ProductService {
     return updatedProduct;
   }
 
-  async remove(id: string) {
-    return this.productRepository.delete(id);
+  async remove(id: string): Promise<DeleteResult> {
+    return this.productRepository.delete({ _id: id });
   }
 }

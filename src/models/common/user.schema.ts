@@ -1,6 +1,9 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
-
+export enum Gender {
+  MALE = 'male',
+  FEMALE = 'female',
+}
 @Schema({
   discriminatorKey: 'role',
   timestamps: true,
@@ -17,6 +20,8 @@ export class User {
   password: string;
   @Prop({ type: String })
   phoneNumber: string;
+  @Prop({ type: String, enum: Gender, default: Gender.MALE })
+  gender: string;
   @Prop({ type: String })
   otp: string;
   @Prop({ type: Date })
@@ -25,6 +30,10 @@ export class User {
   isVerified: boolean;
   @Prop({ type: Date })
   credentialUpdatedAt: Date;
+  @Prop({ type: Boolean, default: false })
+  isDeleted: boolean;
+  @Prop({ type: Date })
+  deletedAt: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

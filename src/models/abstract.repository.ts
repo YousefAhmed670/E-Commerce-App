@@ -1,4 +1,5 @@
 import {
+  DeleteResult,
   Model,
   MongooseUpdateQueryOptions,
   ProjectionType,
@@ -12,7 +13,7 @@ export class AbstractRepository<T> {
 
   async create(item: Partial<T>) {
     const doc = new this.model(item);
-    return doc.save();
+    return await doc.save();
   }
 
   async getAll(
@@ -20,7 +21,7 @@ export class AbstractRepository<T> {
     projection?: ProjectionType<T>,
     options?: QueryOptions,
   ) {
-    return this.model.find(filter, projection, options);
+    return await this.model.find(filter, projection, options);
   }
 
   async getOne(
@@ -28,7 +29,7 @@ export class AbstractRepository<T> {
     projection?: ProjectionType<T>,
     options?: QueryOptions,
   ) {
-    return this.model.findOne(filter, projection, options);
+    return await this.model.findOne(filter, projection, options);
   }
 
   async update(
@@ -36,10 +37,14 @@ export class AbstractRepository<T> {
     update: UpdateQuery<T>,
     options?: MongooseUpdateQueryOptions,
   ) {
-    return this.model.updateOne(filter, update, options);
+    return this.model.findOneAndUpdate(filter, update, options);
   }
 
-  async delete(id: string, options?: QueryOptions) {
-    return this.model.findByIdAndDelete(id, options);
+  async delete(filter: RootFilterQuery<T>): Promise<DeleteResult> {
+    return await this.model.deleteOne(filter);
+  }
+
+  async deleteMany(filter: RootFilterQuery<T>): Promise<DeleteResult> {
+    return await this.model.deleteMany(filter);
   }
 }

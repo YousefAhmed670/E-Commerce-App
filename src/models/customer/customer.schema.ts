@@ -14,9 +14,12 @@ export class Customer {
   email: string;
   password: string;
   phoneNumber: string;
+  gender: string;
   otp: string;
   otpExpiry: Date;
   isVerified: boolean;
+  isDeleted: boolean;
+  deletedAt: Date;
   @Prop({ type: String, enum: ['local', 'google'], default: 'local' })
   userAgent: string;
   credentialUpdatedAt: Date;

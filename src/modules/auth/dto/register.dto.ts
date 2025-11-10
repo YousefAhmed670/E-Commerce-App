@@ -1,5 +1,7 @@
+import { Gender } from '@/models';
 import {
     IsEmail,
+    IsEnum,
     IsNotEmpty,
     IsOptional,
     IsString,
@@ -26,4 +28,8 @@ export class RegisterDto {
   @Length(11,11,{message: 'Phone number must be 11 digits'})
   @IsOptional()
   phoneNumber?: string;
+  @IsString()
+  @IsOptional()
+  @IsEnum(Gender)
+  gender?: string;
 }

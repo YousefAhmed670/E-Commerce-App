@@ -15,6 +15,7 @@ export class AuthFactoryService {
     customer.email = registerDto.email;
     customer.password = await hash(registerDto.password);
     customer.phoneNumber = cryptPhone(registerDto.phoneNumber as string);
+    customer.gender = registerDto.gender as string;
     customer.otp = generateOtp();
     customer.otpExpiry = generateExpiry();
     customer.isVerified = false;

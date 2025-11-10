@@ -12,6 +12,7 @@ import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { CategoryFactoryService } from './facyory';
 import { Auth, MESSAGE, Public, User } from '@/common';
+import { DeleteResult } from 'mongoose';
 
 @Controller('category')
 @Auth('Admin', 'Seller')
@@ -63,7 +64,7 @@ export class CategoryController {
   }
 
   @Delete(':id')
-  async remove(@Param() id: string) {
+  async remove(@Param() id: string): Promise<DeleteResult> {
     return this.categoryService.remove(id);
   }
 }

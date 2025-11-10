@@ -21,6 +21,9 @@ export class Seller {
   shopDescription: string;
   @Prop({ type: String, required: true })
   shopAddress: string;
+  isDeleted: boolean;
+  deletedAt: Date;
+  gender: string;
   credentialUpdatedAt: Date;
 }
 

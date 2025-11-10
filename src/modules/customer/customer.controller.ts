@@ -1,39 +1,76 @@
-import { Auth } from '@/common';
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Put,
-  Req
-} from '@nestjs/common';
+import { Auth, MESSAGE, User } from '@/common';
+import { Body, Controller, Delete, Get, Put } from '@nestjs/common';
 import { CustomerService } from './customer.service';
-import { UpdateCustomerDto } from './dto/update-customer.dto';
+import {
+  RequestEmailUpdateDto,
+  UpdateCustomerDto,
+  UpdateEmailDto,
+} from './dto/update-customer.dto';
+import { userFactoryService } from './factory';
 
 @Controller('customer')
-@Auth('Customer', 'Admin')
+@Auth('Customer', 'Admin', 'Seller')
 export class CustomerController {
-  constructor(private readonly customerService: CustomerService) {}
+  constructor(
+    private readonly customerService: CustomerService,
+    private readonly userFactoryService: userFactoryService,
+  ) {}
   @Get()
-  getProfile(@Req() req) {
+  getProfile(@User() user: any) {
+    const { password, otp, otpExpiry, ...restUser } = JSON.parse(
+      JSON.stringify(user),
+    );
     return {
-      message: 'Profile fetched successfully',
+      message: MESSAGE.profile.found,
       success: true,
-      data: { user: req.user },
+      data: { user: restUser },
     };
   }
 
-  @Put(':id')
-  update(
-    @Param('id') id: string,
+  @Put()
+  async update(
+    @User() user: any,
     @Body() updateCustomerDto: UpdateCustomerDto,
   ) {
-    return this.customerService.update(+id, updateCustomerDto);
+    const customer = this.userFactoryService.updateCustomer(updateCustomerDto);
+    const updatedCustomer = await this.customerService.update(user, customer);
+    const { password, otp, otpExpiry, ...restUser } = JSON.parse(
+      JSON.stringify(updatedCustomer),
+    );
+    return {
+      message: MESSAGE.profile.updated,
+      success: true,
+      data: { user: restUser },
+    };
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.customerService.remove(+id);
+  @Put('request-email-update')
+  async requestEmailUpdate(
+    @User() user: any,
+    @Body() newEmail: RequestEmailUpdateDto,
+  ) {
+    await this.customerService.requestEmailUpdate(user, newEmail);
+    return {
+      message: 'OTP sent successfully to your email',
+      success: true,
+    };
+  }
+
+  @Put('update-email')
+  async updateEmail(@User() user: any, @Body() updateEmailDto: UpdateEmailDto) {
+    await this.customerService.updateEmail(user, updateEmailDto);
+    return {
+      message: 'Email updated successfully',
+      success: true,
+    };
+  }
+
+  @Delete()
+  async remove(@User() user: any) {
+    await this.customerService.remove(user);
+    return {
+      message: MESSAGE.profile.deleted,
+      success: true,
+    };
   }
 }

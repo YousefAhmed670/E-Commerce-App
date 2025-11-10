@@ -1,7 +1,7 @@
 import { MESSAGE } from '@/common';
 import { CategoryRepository } from '@/models';
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
-import { Types } from 'mongoose';
+import { DeleteResult, Types } from 'mongoose';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { Category } from './entities/category.entity';
 
@@ -42,7 +42,7 @@ export class CategoryService {
     );
   }
 
-  remove(id: string) {
-    return this.categoryRepository.delete(id);
+  remove(id: string): Promise<DeleteResult> {
+    return this.categoryRepository.delete({ _id: id });
   }
 }
