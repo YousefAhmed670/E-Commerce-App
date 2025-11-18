@@ -10,6 +10,7 @@ import {
   UserRepository,
   TokenRepository,
   TokenType,
+  UserAgent,
 } from '@/models';
 import {
   BadRequestException,
@@ -27,6 +28,7 @@ import {
 } from './dto/verify-email.dto';
 import { Customer } from './entities/auth.entity';
 import { MESSAGE } from '@/common';
+import { OAuth2Client } from 'google-auth-library';
 @Injectable()
 export class AuthService {
   constructor(
@@ -35,6 +37,7 @@ export class AuthService {
     private readonly configService: ConfigService,
     private readonly userRepository: UserRepository,
     private readonly tokenRepository: TokenRepository,
+    private readonly oAuth2Client: OAuth2Client,
   ) {}
   async register(customer: Customer) {
     const customerExists = await this.userRepository.getOne({
@@ -85,7 +88,9 @@ export class AuthService {
     if (!customerExist.isVerified) {
       throw new BadRequestException('User not verified');
     }
-    if (!(await compareHash(loginDto.password, customerExist.password))) {
+    if (
+      !(await compareHash(loginDto.password, customerExist.password as string))
+    ) {
       throw new BadRequestException('Invalid password');
     }
     if (customerExist.isDeleted) {
@@ -112,6 +117,54 @@ export class AuthService {
       {
         _id: customerExist._id,
         email: customerExist.email,
+        role: 'Customer',
+      },
+      {
+        expiresIn: '1d',
+        secret: this.configService.get('token.refreshSecret'),
+      },
+    );
+    return { token, refreshToken };
+  }
+
+  async googleLogin(idToken: string) {
+    const ticket = await this.oAuth2Client.verifyIdToken({
+      idToken,
+      audience: this.configService.get('google.clientId'),
+    });
+    const payload = ticket.getPayload();
+    if (!payload) {
+      throw new BadRequestException('Invalid google token');
+    }
+    const { email, name } = payload;
+    let user = await this.userRepository.getOne({ email });
+    if (!user) {
+      const createdCustomer = await this.customerRepository.create({
+        userName: name,
+        email,
+        userAgent: UserAgent.GOOGLE,
+        isVerified: true,
+      });
+      if (!createdCustomer) {
+        throw new BadRequestException('Failed to create customer');
+      }
+      let user = createdCustomer;
+    }
+    const token = this.jwtService.sign(
+      {
+        _id: user?._id,
+        email: user?.email,
+        role: 'Customer',
+      },
+      {
+        expiresIn: '1h',
+        secret: this.configService.get('token.secret'),
+      },
+    );
+    const refreshToken = this.jwtService.sign(
+      {
+        _id: user?._id,
+        email: user?.email,
         role: 'Customer',
       },
       {

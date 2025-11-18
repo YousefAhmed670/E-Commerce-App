@@ -3,7 +3,7 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { CategoryController } from './category.controller';
 import { CategoryService } from './category.service';
-import { CategoryFactoryService } from './facyory';
+import { CategoryFactoryService } from './factory';
 
 @Module({
   imports: [

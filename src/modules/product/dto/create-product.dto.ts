@@ -1,4 +1,5 @@
-import { DiscountType } from '@/models';
+import { IsValidDiscount } from '@/common';
+import { DiscountType } from '@/common/types';
 import { Type } from 'class-transformer';
 import {
   IsArray,
@@ -8,7 +9,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
-  MinLength
+  MinLength,
 } from 'class-validator';
 import { Types } from 'mongoose';
 
@@ -26,8 +27,7 @@ export class CreateProductDto {
   @IsNotEmpty()
   price: number;
 
-  @Type(() => Number)
-  @IsNumber()
+  @IsValidDiscount()
   @IsOptional()
   discountAmount: number;
   @IsString()

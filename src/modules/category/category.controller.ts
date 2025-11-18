@@ -1,5 +1,7 @@
 import { Auth, MESSAGE, Public, User } from '@/common';
+import { CategoryRepository } from '@/models';
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -10,12 +12,12 @@ import {
   Query,
 } from '@nestjs/common';
 import { CategoryService } from './category.service';
-import { CreateCategoryDto } from './dto/create-category.dto';
 import {
+  CreateCategoryDto,
   FindAllCategoryDto,
   UpdateCategoryDto,
-} from './dto/update-category.dto';
-import { CategoryFactoryService } from './facyory';
+} from './dto';
+import { CategoryFactoryService } from './factory';
 
 @Controller('category')
 @Auth('Admin', 'Seller')
@@ -23,6 +25,7 @@ export class CategoryController {
   constructor(
     private readonly categoryService: CategoryService,
     private readonly categoryFactoryService: CategoryFactoryService,
+    private readonly categoryRepository: CategoryRepository,
   ) {}
 
   @Post()
@@ -74,6 +77,13 @@ export class CategoryController {
       updateCategoryDto,
       user,
     );
+    const categoryExist = await this.categoryRepository.getOne({
+      slug: category.slug,
+      _id: { $ne: id },
+    });
+    if (categoryExist) {
+      throw new BadRequestException(MESSAGE.category.alreadyExists);
+    }
     const updatedCategory = await this.categoryService.update(id, category);
     return {
       message: MESSAGE.category.updated,

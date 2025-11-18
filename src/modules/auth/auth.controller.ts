@@ -47,6 +47,17 @@ export class AuthController {
     };
   }
 
+  @Post('/google-login')
+  @Public()
+  async googleLogin(@Body('idToken') idToken: string) {
+    const { token, refreshToken } = await this.authService.googleLogin(idToken);
+    return {
+      message: 'User logged in successfully',
+      success: true,
+      data: { token, refreshToken },
+    };
+  }
+
   @Post('/refresh-token')
   async refreshToken(@Req() req) {
     const refreshToken = req.headers.refreshtoken;

@@ -1,18 +1,18 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-} from '@nestjs/common';
-import { ProductService } from './product.service';
-import { CreateProductDto } from './dto/create-product.dto';
-import { UpdateProductDto } from './dto/update-product.dto';
 import { Auth, MESSAGE, Public, User } from '@/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  Query,
+} from '@nestjs/common';
+import { CreateProductDto } from './dto/create-product.dto';
+import { FindAllProductDto, UpdateProductDto } from './dto/update-product.dto';
 import { ProductFactoryService } from './factory';
-import { DeleteResult } from 'mongoose';
+import { ProductService } from './product.service';
 
 @Controller('product')
 @Auth('Admin', 'Seller')
@@ -28,7 +28,7 @@ export class ProductController {
       createProductDto,
       user,
     );
-    const createdProduct = await this.productService.create(product);
+    const createdProduct = await this.productService.create(product, user);
     return {
       message: MESSAGE.product.created,
       success: true,
@@ -37,8 +37,14 @@ export class ProductController {
   }
 
   @Get()
-  findAll() {
-    return this.productService.findAll();
+  @Public()
+  async findAll(@Query() findAllProductDto: FindAllProductDto) {
+    const products = await this.productService.findAll(findAllProductDto);
+    return {
+      message: MESSAGE.product.found,
+      success: true,
+      data: { products },
+    };
   }
 
   @Get(':id')
@@ -52,16 +58,17 @@ export class ProductController {
     };
   }
 
-  @Patch(':id')
+  @Put(':id')
   async update(
     @Param('id') id: string,
     @Body() updateProductDto: UpdateProductDto,
     @User() user: any,
   ) {
-    const updatedProduct = await this.productService.update(
-      id,
+    const product = this.productFactoryService.updateProduct(
       updateProductDto,
+      user,
     );
+    const updatedProduct = await this.productService.update(id, product);
     return {
       message: MESSAGE.product.updated,
       success: true,
@@ -70,7 +77,11 @@ export class ProductController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string): Promise<DeleteResult> {
-    return this.productService.remove(id);
+  async remove(@Param('id') id: string) {
+    await this.productService.remove(id);
+    return {
+      message: MESSAGE.product.deleted,
+      success: true,
+    };
   }
 }

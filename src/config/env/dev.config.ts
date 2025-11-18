@@ -13,4 +13,7 @@ export default () => ({
     user: process.env.NODEMAILER_USER,
     pass: process.env.NODEMAILER_PASS,
   },
+  google: {
+    clientId: process.env.GOOGLE_CLIENT
+  },
 });

@@ -5,6 +5,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { AuthFactoryService } from './factory';
 import { MongooseModule } from '@nestjs/mongoose';
+import { OAuth2Client } from 'google-auth-library';
 @Module({
   imports: [
     MongooseModule.forFeature([
@@ -19,6 +20,7 @@ import { MongooseModule } from '@nestjs/mongoose';
     ConfigService,
     UserRepository,
     TokenRepository,
+    OAuth2Client,
   ],
 })
 export class AuthModule {}

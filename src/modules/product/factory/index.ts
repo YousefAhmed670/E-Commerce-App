@@ -1,9 +1,10 @@
+import { DiscountType } from '@/common/types';
 import { Injectable } from '@nestjs/common';
+import { Types } from 'mongoose';
 import slugify from 'slugify';
 import { CreateProductDto } from '../dto/create-product.dto';
+import { UpdateProductDto } from '../dto/update-product.dto';
 import { Product } from '../entities/product.entity';
-import { Types } from 'mongoose';
-import { DiscountType } from '@/models';
 
 @Injectable()
 export class ProductFactoryService {
@@ -23,6 +24,27 @@ export class ProductFactoryService {
     product.updatedBy = user._id;
     product.colors = createProductDto.colors as string[];
     product.sizes = createProductDto.sizes as string[];
+    return product;
+  }
+  updateProduct(updateProductDto: UpdateProductDto, user: any) {
+    const product: Partial<Product> = {};
+    if (updateProductDto.name) product.name = updateProductDto.name;
+    if (updateProductDto.description)
+      product.description = updateProductDto.description;
+    if (updateProductDto.price) product.price = updateProductDto.price;
+    if (updateProductDto.discountAmount !== undefined)
+      product.discountAmount = updateProductDto.discountAmount;
+    if (updateProductDto.discountType)
+      product.discountType = updateProductDto.discountType;
+    if (updateProductDto.stock !== undefined)
+      product.stock = updateProductDto.stock;
+    if (updateProductDto.categoryId)
+      product.categoryId = new Types.ObjectId(updateProductDto.categoryId);
+    if (updateProductDto.brandId)
+      product.brandId = new Types.ObjectId(updateProductDto.brandId);
+    if (updateProductDto.colors) product.colors = updateProductDto.colors;
+    if (updateProductDto.sizes) product.sizes = updateProductDto.sizes;
+    product.updatedBy = user._id;
     return product;
   }
 }

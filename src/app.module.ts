@@ -10,6 +10,7 @@ import { CategoryModule } from './modules/category/category.module';
 import { CustomerModule } from './modules/customer/customer.module';
 import { ProductModule } from './modules/product/product.module';
 import { CommonModule } from './shared';
+import { CouponModule } from './modules/coupon/coupon.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { CommonModule } from './shared';
     CategoryModule,
     BrandModule,
     CustomerModule,
+    CouponModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -4,6 +4,10 @@ export enum Gender {
   MALE = 'male',
   FEMALE = 'female',
 }
+export enum UserAgent {
+  GOOGLE = 'google',
+  LOCAL = 'local',
+}
 @Schema({
   discriminatorKey: 'role',
   timestamps: true,
@@ -16,12 +20,19 @@ export class User {
   userName: string;
   @Prop({ type: String, required: true, unique: true })
   email: string;
-  @Prop({ type: String, required: true })
-  password: string;
+  @Prop({
+    type: String,
+    required: function () {
+      return this.userAgent == UserAgent.LOCAL;
+    },
+  })
+  password?: string;
   @Prop({ type: String })
-  phoneNumber: string;
+  phoneNumber?: string;
   @Prop({ type: String, enum: Gender, default: Gender.MALE })
-  gender: string;
+  gender: Gender;
+  @Prop({ type: String, enum: UserAgent, default: UserAgent.LOCAL })
+  userAgent: UserAgent;
   @Prop({ type: String })
   otp: string;
   @Prop({ type: Date })

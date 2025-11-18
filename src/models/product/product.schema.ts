@@ -1,10 +1,7 @@
+import { DiscountType } from '@/common/types';
 import { Prop, Schema, SchemaFactory, Virtual } from '@nestjs/mongoose';
 import { SchemaTypes, Types } from 'mongoose';
 
-export enum DiscountType {
-  percentage = 'percentage',
-  fixedAmount = 'fixedAmount',
-}
 @Schema({
   timestamps: true,
   toJSON: { virtuals: true },

@@ -46,6 +46,7 @@ export class BrandService {
         populate: [
           { path: 'createdBy', select: 'userName email' },
           { path: 'updatedBy', select: 'userName email' },
+          { path: 'products' },
         ],
       },
     );
@@ -56,22 +57,16 @@ export class BrandService {
   }
 
   async update(id: string | Types.ObjectId, updateBrandDto: UpdateBrandDto) {
-    const brandExist = await this.brandRepository.getOne({ _id: id });
-    if (!brandExist) {
-      throw new NotFoundException(MESSAGE.brand.notFound);
-    }
+    await this.findOne(id);
     const updatedBrand = await this.brandRepository.update(
-      { _id: brandExist._id },
+      { _id: id },
       updateBrandDto,
     );
     return updatedBrand;
   }
 
   async remove(id: string | Types.ObjectId): Promise<DeleteResult> {
-    const brandExist = await this.brandRepository.getOne({ _id: id });
-    if (!brandExist) {
-      throw new NotFoundException(MESSAGE.brand.notFound);
-    }
+    await this.findOne(id);
     return await this.brandRepository.delete({ _id: id });
   }
 }

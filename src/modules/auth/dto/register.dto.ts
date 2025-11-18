@@ -1,13 +1,14 @@
-import { Gender } from '@/models';
+import { Gender, UserAgent } from '@/models';
 import {
-    IsEmail,
-    IsEnum,
-    IsNotEmpty,
-    IsOptional,
-    IsString,
-    Length,
-    MaxLength,
-    MinLength,
+  IsEmail,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Length,
+  MaxLength,
+  MinLength,
+  ValidateIf,
 } from 'class-validator';
 
 export class RegisterDto {
@@ -20,12 +21,13 @@ export class RegisterDto {
   @IsEmail()
   @IsNotEmpty()
   email: string;
+  @ValidateIf((user) => user.userAgent === UserAgent.LOCAL || !user.userAgent)
   @IsString()
   @MinLength(6)
   @IsNotEmpty()
-  password: string;
+  password?: string;
   @IsString()
-  @Length(11,11,{message: 'Phone number must be 11 digits'})
+  @Length(11, 11, { message: 'Phone number must be 11 digits' })
   @IsOptional()
   phoneNumber?: string;
   @IsString()

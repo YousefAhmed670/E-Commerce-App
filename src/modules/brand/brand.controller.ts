@@ -1,5 +1,7 @@
 import { Auth, MESSAGE, Public, User } from '@/common';
+import { BrandRepository } from '@/models';
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -20,6 +22,7 @@ export class BrandController {
   constructor(
     private readonly brandService: BrandService,
     private readonly brandFactoryService: BrandFactoryService,
+    private readonly brandRepository: BrandRepository,
   ) {}
 
   @Post()
@@ -62,6 +65,13 @@ export class BrandController {
     @User() user: any,
   ) {
     const brand = this.brandFactoryService.updateBrand(updateBrandDto, user);
+    const brandExist = await this.brandRepository.getOne({
+      slug: brand.slug,
+      _id: { $ne: id },
+    });
+    if (brandExist) {
+      throw new BadRequestException(MESSAGE.brand.alreadyExists);
+    }
     const updatedBrand = await this.brandService.update(id, brand);
     return {
       message: MESSAGE.brand.updated,

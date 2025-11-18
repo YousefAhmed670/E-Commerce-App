@@ -1,10 +1,10 @@
 import { PartialType } from '@nestjs/mapped-types';
-import { CreateProductDto } from './create-product.dto';
+import { CreateCouponDto } from './create-coupon.dto';
 import { IsOptional, IsString } from 'class-validator';
 
-export class UpdateProductDto extends PartialType(CreateProductDto) {}
+export class UpdateCouponDto extends PartialType(CreateCouponDto) {}
 
-export class FindAllProductDto {
+export class FindAllCouponDto {
   @IsString()
   @IsOptional()
   limit: string;

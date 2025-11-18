@@ -20,3 +20,28 @@ export class Category {
   logo: Object;
 }
 export const CategorySchema = SchemaFactory.createForClass(Category);
+
+CategorySchema.virtual('products', {
+  ref: 'Product',
+  localField: '_id',
+  foreignField: 'categoryId',
+});
+
+CategorySchema.pre(
+  'deleteOne',
+  { document: false, query: true },
+  async function (next) {
+    try {
+      const filter = this.getFilter();
+      const categoryId = filter._id;
+      if (categoryId) {
+        const ProductModel = this.model.db.model('Product');
+        await ProductModel.deleteMany({ categoryId });
+      }
+      next();
+    } catch (err) {
+      console.log(err);
+      next(err);
+    }
+  },
+);

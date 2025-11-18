@@ -26,10 +26,10 @@ export class CategoryService {
     return createdCategory;
   }
 
-  findAll(findAllCategoryDto: FindAllCategoryDto) {
+  async findAll(findAllCategoryDto: FindAllCategoryDto) {
     const { limit, page } = findAllCategoryDto;
     const skip = (+page - 1) * +limit;
-    return this.categoryRepository.getAll(
+    return await this.categoryRepository.getAll(
       {},
       {},
       {
@@ -43,14 +43,15 @@ export class CategoryService {
     );
   }
 
-  findOne(id: string | Types.ObjectId) {
-    const categoryExist = this.categoryRepository.getOne(
+  async findOne(id: string | Types.ObjectId) {
+    const categoryExist = await this.categoryRepository.getOne(
       { _id: id },
       {},
       {
         populate: [
           { path: 'createdBy', select: 'userName email' },
           { path: 'updatedBy', select: 'userName email' },
+          { path: 'products' },
         ],
       },
     );
@@ -60,23 +61,17 @@ export class CategoryService {
     return categoryExist;
   }
 
-  async update(id: string, updateCategoryDto: UpdateCategoryDto) {
-    const categoryExist = await this.categoryRepository.getOne({ _id: id });
-    if (!categoryExist) {
-      throw new NotFoundException(MESSAGE.category.notFound);
-    }
+  async update(id: string | Types.ObjectId, updateCategoryDto: UpdateCategoryDto) {
+    await this.findOne(id);
     const updatedCategory = await this.categoryRepository.update(
-      { _id: categoryExist._id },
+      { _id: id },
       updateCategoryDto,
     );
     return updatedCategory;
   }
 
   async remove(id: string): Promise<DeleteResult> {
-    const categoryExist = await this.categoryRepository.getOne({ _id: id });
-    if (!categoryExist) {
-      throw new NotFoundException(MESSAGE.category.notFound);
-    }
+    await this.findOne(id);
     return await this.categoryRepository.delete({ _id: id });
   }
 }

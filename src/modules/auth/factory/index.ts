@@ -13,7 +13,7 @@ export class AuthFactoryService {
     const customer = new Customer();
     customer.userName = registerDto.userName;
     customer.email = registerDto.email;
-    customer.password = await hash(registerDto.password);
+    customer.password = await hash(registerDto.password as string);
     customer.phoneNumber = cryptPhone(registerDto.phoneNumber as string);
     customer.gender = registerDto.gender as string;
     customer.otp = generateOtp();

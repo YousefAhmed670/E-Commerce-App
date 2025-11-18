@@ -18,4 +18,5 @@ export const MESSAGE = {
   customer: { ...generalMessages('Customer') },
   seller: { ...generalMessages('Seller') },
   profile: { ...generalMessages('Profile') },
+  coupon: { ...generalMessages('Coupon') },
 };
