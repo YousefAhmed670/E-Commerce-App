@@ -1,21 +1,21 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import {
-    Admin,
-    AdminRepository,
-    AdminSchema,
-    BlackListToken,
-    BlackListTokenSchema,
-    Customer,
-    CustomerRepository,
-    CustomerSchema,
-    Seller,
-    SellerRepository,
-    SellerSchema,
-    TokenRepository,
-    User,
-    UserRepository,
-    UserSchema,
+  Admin,
+  AdminRepository,
+  AdminSchema,
+  BlackListToken,
+  BlackListTokenSchema,
+  Customer,
+  CustomerRepository,
+  CustomerSchema,
+  Seller,
+  SellerRepository,
+  SellerSchema,
+  TokenRepository,
+  User,
+  UserRepository,
+  UserSchema,
 } from 'src/models';
 
 @Module({
@@ -36,7 +36,19 @@ import {
       },
     ]),
   ],
-  providers: [CustomerRepository, AdminRepository, SellerRepository,UserRepository,TokenRepository],
-  exports: [CustomerRepository, AdminRepository, SellerRepository,UserRepository,TokenRepository],
+  providers: [
+    CustomerRepository,
+    AdminRepository,
+    SellerRepository,
+    UserRepository,
+    TokenRepository,
+  ],
+  exports: [
+    CustomerRepository,
+    AdminRepository,
+    SellerRepository,
+    UserRepository,
+    TokenRepository,
+  ],
 })
 export class UserMongoModule {}

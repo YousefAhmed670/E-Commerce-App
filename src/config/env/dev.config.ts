@@ -14,6 +14,6 @@ export default () => ({
     pass: process.env.NODEMAILER_PASS,
   },
   google: {
-    clientId: process.env.GOOGLE_CLIENT
+    clientId: process.env.GOOGLE_CLIENT,
   },
 });

@@ -61,7 +61,10 @@ export class CategoryService {
     return categoryExist;
   }
 
-  async update(id: string | Types.ObjectId, updateCategoryDto: UpdateCategoryDto) {
+  async update(
+    id: string | Types.ObjectId,
+    updateCategoryDto: UpdateCategoryDto,
+  ) {
     await this.findOne(id);
     const updatedCategory = await this.categoryRepository.update(
       { _id: id },

@@ -1,7 +1,7 @@
 export const generateOtp = () => {
-    return Math.floor(100000 + Math.random() * 900000).toString();
-}
+  return Math.floor(100000 + Math.random() * 900000).toString();
+};
 
 export const generateExpiry = () => {
-    return new Date(Date.now() + 10 * 60 * 1000);
-}
+  return new Date(Date.now() + 10 * 60 * 1000);
+};

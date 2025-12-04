@@ -18,14 +18,14 @@ export class CategoryFactoryService {
     return category;
   }
   updateCategory(updateCategoryDto: UpdateCategoryDto, user: any): Category {
-      const category = new Category();
-      category.name = updateCategoryDto.name as string;
-      category.slug = slugify(updateCategoryDto.name as string, {
-        lower: true,
-        trim: true,
-      });
-      category.logo = updateCategoryDto.logo as Object;
-      category.updatedBy = user._id;
-      return category;
-    }
+    const category = new Category();
+    category.name = updateCategoryDto.name as string;
+    category.slug = slugify(updateCategoryDto.name as string, {
+      lower: true,
+      trim: true,
+    });
+    category.logo = updateCategoryDto.logo as Object;
+    category.updatedBy = user._id;
+    return category;
+  }
 }

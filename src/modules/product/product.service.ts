@@ -1,18 +1,20 @@
 import { MESSAGE } from '@/common';
 import { ProductRepository } from '@/models';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { DeleteResult, Types } from 'mongoose';
 import { BrandService } from '../brand/brand.service';
 import { CategoryService } from '../category/category.service';
 import { FindAllProductDto } from './dto/update-product.dto';
 import { Product } from './entities/product.entity';
 import slugify from 'slugify';
+import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 @Injectable()
 export class ProductService {
   constructor(
     private readonly productRepository: ProductRepository,
     private readonly categoryService: CategoryService,
     private readonly brandService: BrandService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
   async create(product: Product, user: any) {
     await this.categoryService.findOne(product.categoryId);
@@ -30,20 +32,28 @@ export class ProductService {
   async findAll(findAllProductDto: FindAllProductDto) {
     const { limit, page } = findAllProductDto;
     const skip = (+page - 1) * +limit;
-    return await this.productRepository.getAll(
-      {},
-      {},
-      {
-        populate: [
-          { path: 'categoryId', select: 'name slug' },
-          { path: 'brandId', select: 'name slug' },
-          { path: 'createdBy', select: 'userName email' },
-          { path: 'updatedBy', select: 'userName email' },
-        ],
-        limit: +limit,
-        skip,
-      },
+    const products = await this.cacheManager.get<Product[]>(
+      `products_${limit}_${skip}`,
     );
+    if (!products) {
+      const products = await this.productRepository.getAll(
+        {},
+        {},
+        {
+          populate: [
+            { path: 'categoryId', select: 'name slug' },
+            { path: 'brandId', select: 'name slug' },
+            { path: 'createdBy', select: 'userName email' },
+            { path: 'updatedBy', select: 'userName email' },
+          ],
+          limit: +limit,
+          skip,
+        },
+      );
+      await this.cacheManager.set(`products_${limit}_${skip}`, products);
+      return products;
+    }
+    return products;
   }
 
   async findOne(id: string | Types.ObjectId) {

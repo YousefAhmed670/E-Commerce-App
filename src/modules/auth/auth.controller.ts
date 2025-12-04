@@ -3,7 +3,11 @@ import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { AuthFactoryService } from './factory';
-import { ResetPasswordDTO, SendOtpDTO, VerifyEmailDTO } from './dto/verify-email.dto';
+import {
+  ResetPasswordDTO,
+  SendOtpDTO,
+  VerifyEmailDTO,
+} from './dto/verify-email.dto';
 import { Auth, MESSAGE, Public, User } from '@/common';
 
 @Controller('auth')
@@ -70,7 +74,7 @@ export class AuthController {
     };
   }
 
-  @Post("/send-otp")
+  @Post('/send-otp')
   async sendOtp(@Body() sendOtpDto: SendOtpDTO) {
     await this.authService.sendOtp(sendOtpDto);
     return {
@@ -79,7 +83,7 @@ export class AuthController {
     };
   }
 
-  @Put("/reset-password")
+  @Put('/reset-password')
   async resetPassword(@Body() resetPasswordDto: ResetPasswordDTO) {
     await this.authService.resetPassword(resetPasswordDto);
     return {
@@ -88,10 +92,10 @@ export class AuthController {
     };
   }
 
-  @Put("/logout")
-  async logout(@Req() req,@User() user:any) {
+  @Put('/logout')
+  async logout(@Req() req, @User() user: any) {
     const token = req.headers.authorization;
-    await this.authService.logout(token,user);
+    await this.authService.logout(token, user);
     return {
       message: MESSAGE.user.logout,
       success: true,

@@ -1,7 +1,7 @@
 import {
-    registerDecorator,
-    ValidationArguments,
-    ValidationOptions,
+  registerDecorator,
+  ValidationArguments,
+  ValidationOptions,
 } from 'class-validator';
 import { DiscountType } from '../types';
 

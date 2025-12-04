@@ -6,7 +6,9 @@ import { Admin } from './admin.schema';
 
 @Injectable()
 export class AdminRepository extends AbstractRepository<Admin> {
-  constructor(@InjectModel(Admin.name) private readonly adminModel: Model<Admin>) {
+  constructor(
+    @InjectModel(Admin.name) private readonly adminModel: Model<Admin>,
+  ) {
     super(adminModel);
   }
 }

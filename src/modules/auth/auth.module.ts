@@ -1,4 +1,11 @@
-import { User, UserRepository, UserSchema, TokenRepository, BlackListTokenSchema, BlackListToken } from '@/models';
+import {
+  User,
+  UserRepository,
+  UserSchema,
+  TokenRepository,
+  BlackListTokenSchema,
+  BlackListToken,
+} from '@/models';
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AuthController } from './auth.controller';
