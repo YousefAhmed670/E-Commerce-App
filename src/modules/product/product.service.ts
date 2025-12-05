@@ -16,6 +16,7 @@ export class ProductService {
     private readonly brandService: BrandService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
+  private cacheKey = '';
   async create(product: Product, user: any) {
     await this.categoryService.findOne(product.categoryId);
     await this.brandService.findOne(product.brandId);
@@ -32,9 +33,8 @@ export class ProductService {
   async findAll(findAllProductDto: FindAllProductDto) {
     const { limit, page } = findAllProductDto;
     const skip = (+page - 1) * +limit;
-    const products = await this.cacheManager.get<Product[]>(
-      `products_${limit}_${skip}`,
-    );
+    this.cacheKey = `products_${limit}_${skip}`;
+    const products = await this.cacheManager.get<Product[]>(this.cacheKey);
     if (!products) {
       const products = await this.productRepository.getAll(
         {},
@@ -50,7 +50,7 @@ export class ProductService {
           skip,
         },
       );
-      await this.cacheManager.set(`products_${limit}_${skip}`, products);
+      await this.cacheManager.set(this.cacheKey, products);
       return products;
     }
     return products;
@@ -105,10 +105,12 @@ export class ProductService {
       { _id: id },
       product,
     );
+    await this.cacheManager.del(this.cacheKey);
     return updatedProduct;
   }
 
   async remove(id: string): Promise<DeleteResult> {
+    await this.cacheManager.del(this.cacheKey);
     return await this.productRepository.delete({ _id: id });
   }
 
